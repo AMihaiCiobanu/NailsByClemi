@@ -1,0 +1,250 @@
+// Services and working hours are read live from the owner's Appointments & Reports account,
+// through the same public booking link the online booking page uses. The result is cached in
+// localStorage for 5 minutes so repeat visits render instantly without hitting Firestore.
+
+const BOOKING_LINK_ID = '3ab7628e-2be5-4ca7-a060-84ee93618f29';
+const CACHE_KEY = 'clemi_data_v1';
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+const FIREBASE_VERSION = '10.14.1';
+const firebaseConfig = {
+  apiKey: 'AIzaSyDVcYMPg0lWd4tMxlfm5MLS8T6jtEXcoi8',
+  authDomain: 'appointmentssync-c680f.firebaseapp.com',
+  projectId: 'appointmentssync-c680f',
+  storageBucket: 'appointmentssync-c680f.firebasestorage.app',
+  messagingSenderId: '600609525849',
+  appId: '1:600609525849:web:6d37c54629691bf6752148'
+};
+const RECAPTCHA_SITE_KEY = '6LcieqUsAAAAAJi2J0k-aawVuqpArTNRx1iccCRr';
+
+const CURRENCY_SYMBOLS = {
+  RON: 'lei', EUR: '€', GBP: '£', USD: '$', BRL: 'R$', CHF: 'Fr', HUF: 'Ft', BGN: 'лв', PLN: 'zł',
+  INR: '₹', TRY: '₺', SEK: 'kr', NOK: 'kr', DKK: 'kr', CZK: 'Kč', AED: 'د.إ',
+  RUB: '₽', KZT: '₸', KGS: 'с', UZS: "so'm"
+};
+
+// Monday first, keys as stored in users/{uid}/setari/bookingPublic (minutes from midnight).
+const DAYS = [
+  { label: 'Luni', key: 'Luni' },
+  { label: 'Marți', key: 'Marti' },
+  { label: 'Miercuri', key: 'Miercuri' },
+  { label: 'Joi', key: 'Joi' },
+  { label: 'Vineri', key: 'Vineri' },
+  { label: 'Sâmbătă', key: 'Sambata' },
+  { label: 'Duminică', key: 'Duminica' }
+];
+
+const SERVICE_GROUPS = [
+  { label: 'Servicii', match: s => !s.isClass && !s.isSubscription },
+  { label: 'Abonamente', match: s => s.isSubscription },
+  { label: 'Cursuri', match: s => s.isClass }
+];
+
+const bookingUrl = document.querySelector('.booking-link')?.href
+  || `https://appointmentsapps.com/booking?id=${BOOKING_LINK_ID}`;
+
+// ---------- cache ----------
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    return data && Array.isArray(data.services) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch { /* storage unavailable: page still works, just without caching */ }
+}
+
+// ---------- Firestore ----------
+
+async function fetchData() {
+  const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
+  const [{ initializeApp }, { initializeAppCheck, ReCaptchaV3Provider }, fs] = await Promise.all([
+    import(`${base}/firebase-app.js`),
+    import(`${base}/firebase-app-check.js`),
+    import(`${base}/firebase-firestore.js`)
+  ]);
+  const { getFirestore, doc, getDoc, collection, getDocs } = fs;
+
+  const app = initializeApp(firebaseConfig);
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch { /* App Check enforcement is off; never block the read on it */ }
+  const db = getFirestore(app);
+
+  const linkSnap = await getDoc(doc(db, 'bookingLinks', BOOKING_LINK_ID));
+  if (!linkSnap.exists()) throw new Error('booking link missing');
+  const link = linkSnap.data();
+  const expiresAt = link.expiresAt?.toDate?.() || null;
+  if (link.isDeleted || link.active === false || (expiresAt && expiresAt.getTime() < Date.now()) || !link.uid) {
+    throw new Error('booking link inactive');
+  }
+
+  const [publicSnap, servicesSnap] = await Promise.all([
+    getDoc(doc(db, `users/${link.uid}/setari/bookingPublic`)),
+    getDocs(collection(db, `users/${link.uid}/servicii`))
+  ]);
+  const settings = publicSnap.exists() ? publicSnap.data() : {};
+
+  const services = servicesSnap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(s => s.isDeleted !== true && s.showService !== false)
+    .map(s => ({
+      name: s.nume || '',
+      durationMinutes: Number(s.durataMinute || 0),
+      price: Number(s.pret || 0),
+      showPrice: s.showPrice !== false,
+      description: s.serviceDescription || '',
+      isClass: s.tipServiciu === 'CLASS',
+      isSubscription: s.tipServiciu === 'SUBSCRIPTION'
+    }))
+    .filter(s => s.name && s.durationMinutes > 0)
+    .sort((a, b) => a.name.localeCompare(b.name, 'ro'));
+
+  const hours = DAYS.map(day => {
+    const start = Number(settings[`programStart${day.key}`] || 0);
+    const end = Number(settings[`programEnd${day.key}`] || 0);
+    return start >= 0 && end > start && end <= 1439 ? { start, end } : null;
+  });
+
+  return {
+    fetchedAt: Date.now(),
+    currency: settings.currency || 'RON',
+    hasHours: Object.keys(settings).length > 0,
+    services,
+    hours
+  };
+}
+
+// ---------- rendering ----------
+
+function formatPrice(amount, currencyCode) {
+  const symbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
+  const formatted = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
+  return `${formatted} ${symbol}`;
+}
+
+function formatDuration(minutes) {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}
+
+function hhmm(minutes) {
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function renderServices(data) {
+  const container = document.getElementById('services');
+  const errorEl = document.getElementById('services-error');
+  container.replaceChildren();
+
+  if (!data.services.length) {
+    errorEl.classList.remove('hidden');
+    return;
+  }
+  errorEl.classList.add('hidden');
+
+  const groups = SERVICE_GROUPS
+    .map(g => ({ ...g, items: data.services.filter(g.match) }))
+    .filter(g => g.items.length);
+  const showHeadings = groups.length > 1;
+
+  for (const group of groups) {
+    if (showHeadings) container.appendChild(el('h3', 'service-group-title', group.label));
+    for (const svc of group.items) {
+      const card = el('a', 'service');
+      card.href = bookingUrl;
+
+      const top = el('div', 'service-top');
+      top.appendChild(el('span', 'service-name', svc.name));
+      if (svc.showPrice && svc.price > 0) top.appendChild(el('span', 'service-price', formatPrice(svc.price, data.currency)));
+      card.appendChild(top);
+
+      card.appendChild(el('span', 'service-meta', formatDuration(svc.durationMinutes)));
+      if (svc.description) card.appendChild(el('p', 'service-desc', svc.description));
+      card.appendChild(el('span', 'service-cta', 'Programează-te →'));
+      container.appendChild(card);
+    }
+  }
+}
+
+function renderHours(data) {
+  const tbody = document.querySelector('#hours-table tbody');
+  const note = document.getElementById('hours-note');
+  const badge = document.getElementById('open-badge');
+  tbody.replaceChildren();
+
+  if (!data.hasHours) {
+    note.textContent = 'Vezi orele disponibile în pagina de programare.';
+    return;
+  }
+  note.textContent = 'Programul poate varia în zilele libere — orele exacte le vezi la programare.';
+
+  const now = new Date();
+  const todayIndex = (now.getDay() + 6) % 7; // Monday = 0
+  DAYS.forEach((day, i) => {
+    const range = data.hours[i];
+    const row = el('tr');
+    if (i === todayIndex) row.classList.add('today');
+    if (!range) row.classList.add('closed');
+    row.appendChild(el('td', null, day.label));
+    row.appendChild(el('td', null, range ? `${hhmm(range.start)} – ${hhmm(range.end)}` : 'Închis'));
+    tbody.appendChild(row);
+  });
+
+  const today = data.hours[todayIndex];
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const isOpen = !!today && nowMinutes >= today.start && nowMinutes < today.end;
+  badge.textContent = isOpen ? `Deschis acum · până la ${hhmm(today.end)}` : 'Închis acum · programează-te online';
+  badge.classList.toggle('is-open', isOpen);
+  badge.hidden = false;
+}
+
+function render(data) {
+  renderServices(data);
+  renderHours(data);
+}
+
+// ---------- boot ----------
+
+async function init() {
+  document.getElementById('year').textContent = String(new Date().getFullYear());
+
+  const cached = readCache();
+  if (cached) render(cached);
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) return;
+
+  try {
+    const fresh = await fetchData();
+    writeCache(fresh);
+    render(fresh);
+  } catch (err) {
+    console.warn('Could not load services', err);
+    if (!cached) {
+      document.getElementById('services').replaceChildren();
+      document.getElementById('services-error').classList.remove('hidden');
+      document.getElementById('hours-note').textContent = 'Vezi orele disponibile în pagina de programare.';
+    }
+  }
+}
+
+init();
