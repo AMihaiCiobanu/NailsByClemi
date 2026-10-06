@@ -224,9 +224,36 @@ function render(data) {
   renderHours(data);
 }
 
+// ---------- theme ----------
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = theme === 'dark' ? '#1b1415' : '#fbf3f1';
+}
+
+function setupThemeToggle() {
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('theme', next); } catch { /* choice lasts for this visit only */ }
+  });
+
+  // Until the visitor picks a theme, keep following the system setting.
+  media.addEventListener('change', e => {
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch { /* ignore */ }
+    if (!saved) applyTheme(e.matches ? 'dark' : 'light');
+  });
+}
+
 // ---------- boot ----------
 
 async function init() {
+  setupThemeToggle();
   document.getElementById('year').textContent = String(new Date().getFullYear());
 
   const cached = readCache();
