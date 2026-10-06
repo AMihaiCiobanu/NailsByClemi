@@ -3,7 +3,7 @@
 // localStorage for 5 minutes so repeat visits render instantly without hitting Firestore.
 
 const BOOKING_LINK_ID = '3ab7628e-2be5-4ca7-a060-84ee93618f29';
-const CACHE_KEY = 'clemi_data_v2';
+const CACHE_KEY = 'clemi_data_v3';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const FIREBASE_VERSION = '10.14.1';
@@ -72,7 +72,7 @@ async function fetchData() {
     import(`${base}/firebase-app-check.js`),
     import(`${base}/firebase-firestore.js`)
   ]);
-  const { getFirestore, doc, getDoc, collection, getDocs } = fs;
+  const { getFirestore, doc, getDoc, collection, getDocs, query, where, Timestamp } = fs;
 
   const app = initializeApp(firebaseConfig);
   try {
@@ -97,7 +97,7 @@ async function fetchData() {
   ]);
   const settings = publicSnap.exists() ? publicSnap.data() : {};
 
-  const services = servicesSnap.docs
+  let services = servicesSnap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .filter(s => s.isDeleted !== true && s.showService !== false)
     .map(s => ({
@@ -112,6 +112,28 @@ async function fetchData() {
     }))
     .filter(s => s.name && s.durationMinutes > 0)
     .sort((a, b) => a.name.localeCompare(b.name, 'ro'));
+
+  // Same rule as the booking page: a class whose whole series has already been held cannot be
+  // booked on any date, so it is not listed. A failed read keeps every class listed.
+  if (services.some(s => s.isClass)) {
+    try {
+      const dayStart = new Date();
+      dayStart.setHours(0, 0, 0, 0);
+      const sessionsSnap = await getDocs(query(
+        collection(db, `users/${link.uid}/classSessions`),
+        where('startDate', '>=', Timestamp.fromDate(dayStart))
+      ));
+      const bookable = new Set(sessionsSnap.docs
+        .map(d => d.data())
+        .filter(row => {
+          const start = row.startDate?.toDate?.();
+          const end = row.endDate?.toDate?.();
+          return row.isDeleted !== true && start && end && end > start;
+        })
+        .map(row => row.serviceId || ''));
+      services = services.filter(s => !s.isClass || bookable.has(s.id));
+    } catch { /* keep every class listed */ }
+  }
 
   const hours = DAYS.map(day => {
     const start = Number(settings[`programStart${day.key}`] || 0);
