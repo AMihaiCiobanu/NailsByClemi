@@ -291,6 +291,59 @@ h3 { font-size: 1.5rem; }
   box-shadow: 0 10px 28px rgba(194, 35, 63, 0.35);
 }
 
+/* Booking dialog: the online booking page, embedded */
+html.dialog-open { overflow: hidden; }
+.booking-dialog {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+}
+.booking-dialog[open] { display: flex; flex-direction: column; }
+.booking-dialog::backdrop { background: rgba(30, 12, 16, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.booking-dialog-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px 10px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.booking-dialog-bar h2 { margin: 0; font-size: 1.5rem; }
+.booking-dialog-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.booking-dialog-close:hover { background: var(--accent-soft); color: var(--accent); }
+.booking-dialog-body { position: relative; flex: 1; min-height: 0; }
+.booking-dialog-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.booking-dialog iframe { position: relative; width: 100%; height: 100%; border: 0; display: block; opacity: 0; transition: opacity 0.2s ease; }
+.booking-dialog iframe.is-loaded { opacity: 1; }
+
+@media (min-width: 768px) {
+  .booking-dialog {
+    width: min(600px, calc(100vw - 48px));
+    height: min(860px, calc(100dvh - 48px));
+    margin: auto;
+    border-radius: var(--radius);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  }
+}
+
 @media (min-width: 768px) {
   body { padding-bottom: 0; }
   .sticky-book { display: none; }

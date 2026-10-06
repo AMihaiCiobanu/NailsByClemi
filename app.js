@@ -3,7 +3,7 @@
 // localStorage for 5 minutes so repeat visits render instantly without hitting Firestore.
 
 const BOOKING_LINK_ID = '3ab7628e-2be5-4ca7-a060-84ee93618f29';
-const CACHE_KEY = 'clemi_data_v1';
+const CACHE_KEY = 'clemi_data_v2';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const FIREBASE_VERSION = '10.14.1';
@@ -40,8 +40,9 @@ const SERVICE_GROUPS = [
   { label: 'Cursuri', match: s => s.isClass }
 ];
 
-const bookingUrl = document.querySelector('.booking-link')?.href
-  || `https://appointmentsapps.com/booking?id=${BOOKING_LINK_ID}`;
+// Local preview talks to the main site served on :8080; production uses the live booking page.
+const BOOKING_ORIGIN = location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://appointmentsapps.com';
+const bookingUrl = `https://appointmentsapps.com/booking?id=${BOOKING_LINK_ID}`;
 
 // ---------- cache ----------
 
@@ -100,6 +101,7 @@ async function fetchData() {
     .map(d => ({ id: d.id, ...d.data() }))
     .filter(s => s.isDeleted !== true && s.showService !== false)
     .map(s => ({
+      id: s.id,
       name: s.nume || '',
       durationMinutes: Number(s.durataMinute || 0),
       price: Number(s.pret || 0),
@@ -172,7 +174,8 @@ function renderServices(data) {
     if (showHeadings) container.appendChild(el('h3', 'service-group-title', group.label));
     for (const svc of group.items) {
       const card = el('a', 'service');
-      card.href = bookingUrl;
+      card.href = `${bookingUrl}&service=${encodeURIComponent(svc.id)}`;
+      card.dataset.serviceId = svc.id;
 
       const top = el('div', 'service-top');
       top.appendChild(el('span', 'service-name', svc.name));
@@ -224,6 +227,73 @@ function render(data) {
   renderHours(data);
 }
 
+// ---------- booking dialog ----------
+
+// The booking page itself runs inside the dialog (embed=1), opened straight on the calendar of
+// the chosen service, so visitors book without leaving this page. Modifier clicks still open
+// the booking page in a new tab, and without JavaScript every link goes there directly.
+
+function embeddedBookingUrl(serviceId) {
+  const params = new URLSearchParams({
+    id: BOOKING_LINK_ID,
+    embed: '1',
+    lang: 'ro',
+    theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+  });
+  if (serviceId) params.set('service', serviceId);
+  return `${BOOKING_ORIGIN}/booking/?${params}`;
+}
+
+function setupBookingDialog() {
+  const dialog = document.getElementById('booking-dialog');
+  const body = document.getElementById('booking-dialog-body');
+  if (!dialog || typeof dialog.showModal !== 'function') return; // old browser: plain links
+
+  // A fresh iframe per opening: changing an existing iframe's src adds entries to the joint
+  // session history, which would make Back step through the iframe instead of closing.
+  let frame = null;
+  // A reload while the dialog was open lands back on its history entry; start clean.
+  if (history.state?.bookingDialog) history.replaceState(null, '');
+
+  function finishClose() {
+    if (dialog.open) dialog.close();
+    document.documentElement.classList.remove('dialog-open');
+    frame?.remove();
+    frame = null;
+  }
+
+  // Opening pushes a history entry so the phone's Back button closes the dialog
+  // instead of leaving the page.
+  function requestClose() {
+    if (history.state?.bookingDialog) history.back();
+    else finishClose();
+  }
+
+  function open(serviceId) {
+    frame?.remove();
+    frame = document.createElement('iframe');
+    frame.title = 'Programare online';
+    frame.src = embeddedBookingUrl(serviceId);
+    frame.addEventListener('load', () => frame?.classList.add('is-loaded'), { once: true });
+    body.appendChild(frame);
+    document.documentElement.classList.add('dialog-open');
+    dialog.showModal();
+    history.pushState({ bookingDialog: true }, '');
+  }
+
+  document.getElementById('booking-dialog-close').addEventListener('click', requestClose);
+  dialog.addEventListener('cancel', e => { e.preventDefault(); requestClose(); });
+  dialog.addEventListener('click', e => { if (e.target === dialog) requestClose(); });
+  window.addEventListener('popstate', () => { if (dialog.open) finishClose(); });
+
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a.service, a.booking-link');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    open(link.dataset.serviceId || '');
+  });
+}
+
 // ---------- theme ----------
 
 function applyTheme(theme) {
@@ -254,6 +324,7 @@ function setupThemeToggle() {
 
 async function init() {
   setupThemeToggle();
+  setupBookingDialog();
   document.getElementById('year').textContent = String(new Date().getFullYear());
 
   const cached = readCache();
