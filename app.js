@@ -296,12 +296,25 @@ function setupBookingDialog() {
     frame = document.createElement('iframe');
     frame.title = 'Programare online';
     frame.src = embeddedBookingUrl(serviceId);
-    frame.addEventListener('load', () => frame?.classList.add('is-loaded'), { once: true });
+    // The booking page reports when its first screen (the calendar) has settled; until then
+    // the loader stays up. Fallback in case that message never arrives.
+    const shown = frame;
+    frame.addEventListener('load', () => setTimeout(() => reveal(shown), 8000), { once: true });
     body.appendChild(frame);
     document.documentElement.classList.add('dialog-open');
     dialog.showModal();
     history.pushState({ bookingDialog: true }, '');
   }
+
+  function reveal(target) {
+    if (target && target === frame) frame.classList.add('is-loaded');
+  }
+
+  window.addEventListener('message', e => {
+    if (e.origin === BOOKING_ORIGIN && e.data?.type === 'booking-ready' && e.source === frame?.contentWindow) {
+      reveal(frame);
+    }
+  });
 
   document.getElementById('booking-dialog-close').addEventListener('click', requestClose);
   dialog.addEventListener('cancel', e => { e.preventDefault(); requestClose(); });
