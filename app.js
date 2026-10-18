@@ -2,7 +2,7 @@
 // through the same public booking link the online booking page uses. The result is cached in
 // localStorage for 5 minutes so repeat visits render instantly without hitting Firestore.
 
-const BOOKING_LINK_ID = '4bbeb4d2-4a0d-4e37-b770-6bc9f842ce8b';
+const BOOKING_LINK_ID = '269a0a1f-b12e-44cf-8402-7465474d6eb6';
 const CACHE_KEY = 'clemi_data_v3';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
