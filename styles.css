@@ -57,7 +57,6 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  padding-bottom: 76px;
 }
 
 img { max-width: 100%; display: block; }
@@ -275,14 +274,15 @@ h3 { font-size: 1.5rem; }
 /* Sticky mobile booking */
 .sticky-book {
   position: fixed;
-  left: 16px;
   right: 16px;
   bottom: 12px;
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  font-size: 0.9rem;
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);

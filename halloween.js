@@ -29,9 +29,9 @@
     // post and arms
     + '<rect x="55" y="100" width="10" height="100" rx="3" fill="#5a3a22"/>'
     + '<rect x="6" y="86" width="108" height="9" rx="4.5" fill="#6b4529"/>'
-    // straw cuffs
-    + '<g stroke="#e0a43a" stroke-width="2.5" stroke-linecap="round"><path d="M8 88l-8-5M8 91l-9 1M8 94l-8 5M112 88l8-5M112 91l9 1M112 94l8 5"/>'
-    + '<path d="M44 150l-6 12M52 152l-2 14M60 153v14M68 152l2 14M76 150l6 12"/></g>'
+    // red nails on the hands, straw below
+    + '<g stroke="#d6213f" stroke-width="3" stroke-linecap="round"><path d="M8 88l-8-5M8 91l-9 1M8 94l-8 5M112 88l8-5M112 91l9 1M112 94l8 5"/></g>'
+    + '<g stroke="#e0a43a" stroke-width="2.5" stroke-linecap="round"><path d="M44 150l-6 12M52 152l-2 14M60 153v14M68 152l2 14M76 150l6 12"/></g>'
     // shirt with patches
     + '<path d="M32 88h56l-6 64H38z" fill="#7a3b9f"/>'
     + '<path d="M32 88h56v8H32z" fill="#5d2b7c"/>'
