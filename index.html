@@ -15,6 +15,13 @@
       try { saved = localStorage.getItem('theme'); } catch (_) { }
       var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      // HALLOWEEN:start
+      // Halloween season: 15 Oct – 2 Nov. ?halloween=1 previews it, ?halloween=0 turns it off.
+      var q = /[?&]halloween=([01])/.exec(location.search);
+      var d = new Date(), m = d.getMonth(), day = d.getDate();
+      var season = q ? q[1] === '1' : (m === 9 && day >= 15) || (m === 10 && day <= 2);
+      if (season) document.documentElement.setAttribute('data-season', 'halloween');
+      // HALLOWEEN:end
     })();
   </script>
 
@@ -39,6 +46,7 @@
     rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css?v=7" />
+  <!-- HALLOWEEN:start --><link rel="stylesheet" href="halloween.css?v=3" /><!-- HALLOWEEN:end -->
 
   <script type="application/ld+json">
   {
@@ -362,6 +370,7 @@
   <a class="sticky-book booking-link" href="https://appointmentsapps.com/booking?id=4bbeb4d2-4a0d-4e37-b770-6bc9f842ce8b">Programează-te online</a>
 
   <script src="lightbox.js?v=1" defer></script>
+  <!-- HALLOWEEN:start --><script src="halloween.js?v=3" defer></script><!-- HALLOWEEN:end -->
   <script type="module" src="app.js?v=6"></script>
 </body>
 

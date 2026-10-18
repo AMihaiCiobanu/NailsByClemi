@@ -1,0 +1,149 @@
+/* Halloween theme. Active only when <html data-season="halloween"> (set in the head script of index.html:
+   15 Oct – 2 Nov, or ?halloween=1 to preview, ?halloween=0 to turn it off). */
+
+:root[data-season="halloween"] {
+  --bg: #150f1f;
+  --bg-tint: #1d1429;
+  --surface: #251a35;
+  --text: #f4ecff;
+  --muted: #b9a9d0;
+  --line: #3b2a54;
+  --accent: #ff7a1a;
+  --accent-ink: #1a0f00;
+  --accent-soft: #3a2447;
+  --blush: #7a4aa8;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+/* One fixed spooky palette: the light/dark switch has nothing to do in this season. */
+[data-season="halloween"] .theme-toggle { display: none; }
+
+[data-season="halloween"] .btn:hover { box-shadow: 0 8px 22px rgba(255, 122, 26, 0.35); }
+[data-season="halloween"] .btn-ghost:hover { box-shadow: none; }
+[data-season="halloween"] .sticky-book { box-shadow: 0 10px 28px rgba(255, 122, 26, 0.35); }
+[data-season="halloween"] .cta { background: linear-gradient(135deg, #4a1a85 0%, #2a0f4d 100%); }
+[data-season="halloween"] .btn-light { background: #fff; color: #4a1a85; border-color: #fff; }
+[data-season="halloween"] h1 em { text-shadow: 0 0 22px rgba(255, 122, 26, 0.55); animation: hw-flicker 4s infinite; }
+[data-season="halloween"] .hero { position: relative; }
+[data-season="halloween"] .hero-visual img { box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.55), 0 0 44px rgba(255, 122, 26, 0.28); }
+
+/* Decor layer inside the hero (bats, cobweb, pumpkin) */
+.hw-decor { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.hw-web { position: absolute; top: 0; left: 0; width: 120px; height: 120px; color: #cfc2e6; opacity: 0.35; }
+.hw-pumpkin { position: absolute; right: 12px; bottom: 18px; width: 64px; height: auto; filter: drop-shadow(0 0 14px rgba(255, 122, 26, 0.55)); }
+.hw-bat { position: absolute; left: -60px; width: 40px; height: auto; color: #8a5cc0; fill: currentColor; opacity: 0.85; animation: hw-fly 14s linear infinite; }
+.hw-bat:nth-of-type(2) { top: 18%; width: 30px; animation-duration: 19s; animation-delay: -6s; }
+.hw-bat:nth-of-type(3) { top: 52%; width: 36px; animation-duration: 16s; animation-delay: -11s; }
+.hw-bat { top: 8%; }
+.hw-bat .wing { transform-box: fill-box; transform-origin: center bottom; animation: hw-flap 0.35s ease-in-out infinite alternate; }
+.hero-inner { position: relative; z-index: 2; }
+
+@keyframes hw-fly {
+  from { transform: translate(0, 0); }
+  50% { transform: translate(55vw, 30px); }
+  to { transform: translate(115vw, -10px); }
+}
+@keyframes hw-flap { from { transform: scaleY(1); } to { transform: scaleY(0.45); } }
+@keyframes hw-flicker {
+  0%, 100% { text-shadow: 0 0 22px rgba(255, 122, 26, 0.55); }
+  45% { text-shadow: 0 0 22px rgba(255, 122, 26, 0.55); }
+  48% { text-shadow: 0 0 6px rgba(255, 122, 26, 0.25); }
+  52% { text-shadow: 0 0 26px rgba(255, 122, 26, 0.7); }
+}
+
+/* Sound on/off */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.sound-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.sound-toggle .icon-off { display: none; }
+.sound-toggle[aria-pressed="false"] .icon-on { display: none; }
+.sound-toggle[aria-pressed="false"] .icon-off { display: block; }
+
+/* Scarecrow */
+.scarecrow {
+  position: fixed;
+  left: 8px;
+  bottom: 76px;
+  z-index: 25;
+  width: 84px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  animation: hw-sway 5s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.scarecrow svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.scarecrow:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+.scarecrow .eye { fill: #1a0f00; transition: fill 0.1s; }
+.scarecrow.is-scared { animation: hw-jump 0.7s cubic-bezier(.3, 1.6, .5, 1); }
+.scarecrow.is-scared .eye { fill: #ff7a1a; filter: drop-shadow(0 0 4px #ff7a1a); }
+.scarecrow.is-scared .mouth { transform: scaleY(1.7); transform-box: fill-box; transform-origin: center; }
+.scare-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 4px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: #fff;
+  color: #2a0f4d;
+  font: 700 0.95rem/1.2 var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-30%, 6px) scale(0.8);
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+}
+.scarecrow.is-scared .scare-bubble { opacity: 1; transform: translate(-30%, 0) scale(1); }
+
+@keyframes hw-sway { 0%, 100% { transform: rotate(-1.8deg); } 50% { transform: rotate(1.8deg); } }
+@keyframes hw-jump {
+  0% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-34px) rotate(-8deg) scale(1.08); }
+  50% { transform: translateY(0) rotate(6deg); }
+  70% { transform: translateY(-10px) rotate(-4deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+/* Spiders: fixed layer, never intercepts clicks */
+.hw-spiders { position: fixed; inset: 0; z-index: 24; pointer-events: none; overflow: hidden; }
+.hw-spider { position: absolute; top: 0; left: 0; width: 60px; height: 60px; margin: -30px 0 0 -30px; will-change: transform; }
+.hw-spider svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 6px rgba(150, 110, 230, 0.45)) drop-shadow(3px 8px 4px rgba(0, 0, 0, 0.6)); }
+.hw-leg { transform-box: view-box; }
+.walking .hw-leg { animation: hw-leg 0.2s ease-in-out infinite alternate; }
+.walking .hw-leg.b { animation-delay: -0.2s; animation-direction: alternate-reverse; }
+@keyframes hw-leg { from { transform: rotate(-11deg); } to { transform: rotate(11deg); } }
+
+.hw-dangler { position: absolute; top: -520px; width: 60px; height: 520px; }
+.hw-thread { position: absolute; left: 30px; top: 0; width: 1px; height: 496px; background: linear-gradient(#8a7aa3, #cfc2e6); opacity: 0.7; }
+.hw-dangler .hw-spider { top: 496px; left: 30px; transform: rotate(3.1416rad); }
+
+@media (min-width: 768px) {
+  .hw-spider { width: 80px; height: 80px; margin: -40px 0 0 -40px; }
+  .hw-dangler { width: 80px; }
+  .hw-thread { left: 40px; }
+  .hw-dangler .hw-spider { left: 40px; }
+  .scarecrow { bottom: 0; left: 14px; width: 104px; }
+  .hw-web { width: 170px; height: 170px; }
+  .hw-pumpkin { width: 90px; right: 24px; bottom: 28px; }
+  .hw-bat { width: 52px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scarecrow, .scarecrow.is-scared, .hw-bat, .hw-bat .wing, [data-season="halloween"] h1 em { animation: none; }
+  .hw-bat { display: none; }
+}
