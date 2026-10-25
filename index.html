@@ -23,9 +23,9 @@
       if (season) document.documentElement.setAttribute('data-season', 'halloween');
       // HALLOWEEN:end
       // HOLIDAY:start
-      // Holiday banner: 26 Oct – 1 Nov 2026, hidden automatically from 2 Nov. ?holiday=1 previews it.
+      // Holiday banner: shown from 25 Oct, holiday 26 Oct – 1 Nov 2026, hidden automatically from 2 Nov. ?holiday=1 previews it.
       var h = /[?&]holiday=([01])/.exec(location.search);
-      var inHoliday = d >= new Date(2026, 9, 26) && d < new Date(2026, 10, 2);
+      var inHoliday = d >= new Date(2026, 9, 25) && d < new Date(2026, 10, 2);
       if (h ? h[1] === '1' : inHoliday) document.documentElement.setAttribute('data-holiday', '');
       // HOLIDAY:end
     })();
