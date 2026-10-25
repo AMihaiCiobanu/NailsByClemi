@@ -375,3 +375,16 @@ html.dialog-open { overflow: hidden; }
   .service-skeleton { animation: none; }
   .btn, .service { transition: none; }
 }
+
+/* HOLIDAY:start */
+.holiday-banner {
+  display: none;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+:root[data-holiday] .holiday-banner { display: block; }
+/* HOLIDAY:end */
