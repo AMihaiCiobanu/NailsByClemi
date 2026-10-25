@@ -355,11 +355,25 @@ function setupThemeToggle() {
   });
 }
 
+// ---------- holiday ----------
+
+// While the holiday banner is up (data-holiday, set in index.html), phone links are disabled:
+// bookings are online only.
+function setupHolidayPhoneLinks() {
+  if (!document.documentElement.hasAttribute('data-holiday')) return;
+  for (const link of document.querySelectorAll('a[href^="tel:"]')) {
+    link.removeAttribute('href');
+    link.setAttribute('aria-disabled', 'true');
+    link.title = 'Programări doar online în perioada 26.10 – 01.11';
+  }
+}
+
 // ---------- boot ----------
 
 async function init() {
   setupThemeToggle();
   setupBookingDialog();
+  setupHolidayPhoneLinks();
   document.getElementById('year').textContent = String(new Date().getFullYear());
 
   const cached = readCache();

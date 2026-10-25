@@ -388,3 +388,7 @@ html.dialog-open { overflow: hidden; }
 }
 :root[data-holiday] .holiday-banner { display: block; }
 /* HOLIDAY:end */
+
+/* HOLIDAY:start */
+a[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+/* HOLIDAY:end */
