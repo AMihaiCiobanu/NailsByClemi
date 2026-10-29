@@ -239,8 +239,10 @@ function renderHours(data) {
   const today = data.hours[todayIndex];
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isOpen = !!today && nowMinutes >= today.start && nowMinutes < today.end;
-  badge.textContent = isOpen ? `Deschis acum · până la ${hhmm(today.end)}` : 'Închis acum · programează-te online';
-  badge.classList.toggle('is-open', isOpen);
+  const onHoliday = document.documentElement.hasAttribute('data-holiday');
+  badge.textContent = onHoliday ? 'În vacanță 🌴 · revin pe 02.11, programează-te online'
+    : isOpen ? `Deschis acum · până la ${hhmm(today.end)}` : 'Închis acum · programează-te online';
+  badge.classList.toggle('is-open', isOpen && !onHoliday);
   badge.hidden = false;
 }
 
