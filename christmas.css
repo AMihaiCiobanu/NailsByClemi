@@ -189,7 +189,15 @@
   .snowman { left: 14px; width: 110px; }
 }
 
+/* Phone in landscape: smaller snowman, so it and its bubble keep most of the short screen free. */
+@media (max-height: 500px) {
+  .snowman { width: 66px; }
+  .xm-bubble { font-size: 0.8rem; padding: 4px 10px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .snowman.is-admiring .xm-arm, .snowman.is-admiring .xm-head, .snowman.is-admiring .xm-pupils,
+  .snowman.is-admiring .xm-lids, .snowman.is-admiring .xm-sparkle, .snowman.is-admiring .xm-nails,
   .snowman, .snowman .xm-arm-l, .xm-tree .xm-light, .xm-tree .xm-star { animation: none; }
   [data-season="christmas"] .service:hover::after { transform: rotate(-8deg); }
 }

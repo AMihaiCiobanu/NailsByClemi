@@ -135,35 +135,35 @@
   const bubble = snowman.querySelector('.xm-bubble');
   const LINES = ['Ia uite ce unghii! 💅', 'Roșu de Crăciun ❤️', 'Mi le-a făcut Clemi!', 'Nici nu se topesc!'];
   let lineIx = -1;
-  let busy = false;
-  let endTimer = 0;
+  const SHOW_MS = 5000; // each line stays up 5 s
+  const GAP_MS = 3000; // then 3 s of silence before the next one
+  let armTimer = 0;
+  let talkTimer = 0;
+  let nextTimer = 0;
 
-  function admire(talk) {
-    if (talk) {
-      lineIx = (lineIx + 1) % LINES.length;
-      bubble.textContent = LINES[lineIx];
-    }
-    snowman.classList.toggle('is-talking', !!talk);
+  // Says the next line (they come one after another) and looks at the nails, as if tapped.
+  // Then schedules the following line, so it keeps talking on its own: 5 s on, 3 s off.
+  function talk() {
+    lineIx = (lineIx + 1) % LINES.length;
+    bubble.textContent = LINES[lineIx];
+    // The bubble text is visible inside the button, so it must be part of its accessible name too.
+    snowman.setAttribute('aria-label', 'Om de zăpadă cu unghii roșii: ' + LINES[lineIx]);
+    snowman.classList.add('is-talking');
     snowman.classList.remove('is-admiring');
     void snowman.offsetWidth; // restart the animation on rapid clicks
     snowman.classList.add('is-admiring');
-    busy = true;
-    clearTimeout(endTimer);
-    endTimer = setTimeout(function () {
-      snowman.classList.remove('is-admiring', 'is-talking');
-      busy = false;
-    }, 3200);
+    clearTimeout(armTimer);
+    clearTimeout(talkTimer);
+    clearTimeout(nextTimer);
+    armTimer = setTimeout(function () { snowman.classList.remove('is-admiring'); }, 3200);
+    talkTimer = setTimeout(function () { snowman.classList.remove('is-talking'); }, SHOW_MS);
+    nextTimer = setTimeout(function next() {
+      // Background tab: wait, don't burn through the lines unseen.
+      if (document.hidden) { nextTimer = setTimeout(next, GAP_MS); return; }
+      talk();
+    }, SHOW_MS + GAP_MS);
   }
 
-  snowman.addEventListener('click', function () { admire(true); });
-
-  if (!reduced) {
-    // Glance at the nails every 6–11 s, without talking.
-    (function loop() {
-      setTimeout(function () {
-        if (!busy && !document.hidden) admire(false);
-        loop();
-      }, 6000 + Math.random() * 5000);
-    })();
-  }
+  snowman.addEventListener('click', talk);
+  nextTimer = setTimeout(talk, GAP_MS);
 })();
