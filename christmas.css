@@ -1,0 +1,195 @@
+/* Christmas theme. Active only when <html data-season="christmas"> (set in the head script of index.html:
+   6 Nov – 29 Dec 2026, or ?christmas=1 to preview, ?christmas=0 to turn it off). */
+
+/* ---------- Winter palette: icy blue light theme, midnight blue dark theme, Christmas red accent ---------- */
+:root[data-season="christmas"] {
+  --bg: #f3f7fb;
+  --bg-tint: #e5eef7;
+  --surface: #ffffff;
+  --text: #1d2533;
+  --muted: #566377;
+  --line: #d3dfeb;
+  --accent: #c2233f;
+  --accent-ink: #ffffff;
+  --accent-soft: #f9dfe3;
+  --blush: #b8cde2;
+  --shadow: 0 10px 30px rgba(40, 70, 110, 0.12);
+}
+:root[data-season="christmas"][data-theme="dark"] {
+  --bg: #0e1726;
+  --bg-tint: #13203a;
+  --surface: #1a2943;
+  --text: #eef3fa;
+  --muted: #a8b6ca;
+  --line: #2a3c5a;
+  --accent: #f27386;
+  --accent-ink: #0e1726;
+  --accent-soft: #2f2a45;
+  --blush: #4d6a92;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+[data-season="christmas"] .cta { background: linear-gradient(135deg, #b81f3a 0%, #8c1630 100%); }
+[data-season="christmas"] .sticky-book { box-shadow: 0 10px 28px rgba(194, 35, 63, 0.3); }
+
+/* ---------- Hero: tinsel garland along the top, Christmas tree beside the photo ---------- */
+[data-season="christmas"] .hero { position: relative; }
+[data-season="christmas"] .hero-inner { position: relative; z-index: 2; }
+.xm-garland {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  z-index: 1;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 34'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M0 3Q40 26 80 3T160 3' stroke='%23d9a92e' stroke-width='5' stroke-dasharray='1 4'/%3E%3Cpath d='M0 3Q40 26 80 3T160 3' stroke='%23f2d27a' stroke-width='2'/%3E%3C/g%3E%3Cpath d='M40 14v4M120 14v4' stroke='%23b08a2a' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='23' r='6' fill='%23c2233f'/%3E%3Ccircle cx='120' cy='23' r='6' fill='%23d9a92e'/%3E%3Ccircle cx='38' cy='21' r='1.8' fill='%23fff' opacity='.7'/%3E%3Ccircle cx='118' cy='21' r='1.8' fill='%23fff' opacity='.7'/%3E%3C/svg%3E") repeat-x 0 0 / 160px 34px;
+}
+.xm-tree {
+  position: absolute;
+  right: -6px;
+  bottom: -14px;
+  z-index: 3;
+  width: 78px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(20, 40, 70, 0.3));
+}
+.xm-tree .xm-light { animation: xm-twinkle 1.6s ease-in-out infinite alternate; }
+.xm-tree .xm-light:nth-of-type(2n) { animation-delay: -0.8s; }
+.xm-tree .xm-light:nth-of-type(3n) { animation-delay: -0.4s; animation-duration: 2.1s; }
+.xm-tree .xm-star { transform-box: fill-box; transform-origin: center; animation: xm-glow 2.4s ease-in-out infinite alternate; }
+@keyframes xm-twinkle { from { opacity: 0.35; } to { opacity: 1; } }
+@keyframes xm-glow { from { transform: scale(0.9); opacity: 0.85; } to { transform: scale(1.08); opacity: 1; } }
+
+/* ---------- Bow in the bottom-right corner of each service card ---------- */
+[data-season="christmas"] .service { position: relative; }
+[data-season="christmas"] .service::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 46px;
+  height: 34px;
+  pointer-events: none;
+  transform: rotate(-8deg);
+  transition: transform 0.25s cubic-bezier(.4, 1.6, .5, 1);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 44'%3E%3Cpath d='M27 21L17 40l7-3 4 6 3-21zM33 21l10 19-7-3-4 6-3-21z' fill='%23a51b33'/%3E%3Cpath d='M30 19C18 3 2 5 5 18c2 9 14 9 25 3zM30 19C42 3 58 5 55 18c-2 9-14 9-25 3z' fill='%23d6213f'/%3E%3Cpath d='M28 19C20 11 11 11 11 17c0 4 8 5 17 3zM32 19c8-8 17-8 17-2 0 4-8 5-17 3z' fill='%238f1a2e'/%3E%3Cpath d='M9 11c3-3 8-3 11-1' stroke='%23ff8a9b' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.8'/%3E%3Cellipse cx='30' cy='20' rx='5.5' ry='5' fill='%23e8344f'/%3E%3Cellipse cx='28.5' cy='18.5' rx='1.6' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+[data-season="christmas"] .service:hover::after { transform: rotate(6deg) scale(1.1); }
+
+@media (min-width: 768px) {
+  .xm-garland { height: 40px; background-size: 190px 40px; }
+  .xm-tree { width: 112px; right: -26px; bottom: -18px; }
+}
+
+/* ---------- Snow: fixed layer, never intercepts clicks ---------- */
+.xm-snow { position: fixed; inset: 0; z-index: 24; pointer-events: none; overflow: hidden; }
+.xm-flake {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  margin-left: calc(var(--size) / -2);
+  opacity: var(--o);
+  will-change: transform;
+  animation: xm-fall var(--dur) linear var(--delay) infinite;
+}
+.xm-flake i { display: block; width: 100%; height: 100%; animation: xm-sway var(--sway) ease-in-out infinite alternate; }
+.xm-flake svg { display: block; width: 100%; height: 100%; }
+
+@keyframes xm-fall {
+  from { transform: translateY(-60px) rotate(0); }
+  to { transform: translateY(calc(100vh + 60px)) rotate(var(--spin)); }
+}
+@keyframes xm-sway {
+  from { transform: translateX(calc(var(--drift) * -1)); }
+  to { transform: translateX(var(--drift)); }
+}
+
+/* ---------- Snowman ---------- */
+.snowman {
+  position: fixed;
+  left: 6px;
+  bottom: 0;
+  z-index: 25;
+  width: 84px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  animation: xm-bob 4s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.snowman svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 4px 8px rgba(60, 80, 110, 0.25)); }
+.snowman:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+
+.snowman .xm-arm,
+.snowman .xm-arm-l,
+.snowman .xm-head,
+.snowman .xm-pupils,
+.snowman .xm-sparkle { transform-box: view-box; transition: transform 0.45s cubic-bezier(.4, 1.4, .5, 1); }
+.snowman .xm-arm { transform-origin: 90px 95px; }
+.snowman .xm-arm-l { transform-origin: 50px 98px; animation: xm-wave 3s ease-in-out infinite alternate; }
+.snowman .xm-head { transform-origin: 70px 78px; }
+.snowman .xm-sparkle { opacity: 0; transform-origin: 140px 118px; }
+.snowman .xm-lids { opacity: 0; }
+
+/* Looking at the nails: arm up beside the face, head and eyes turn to it, nails sparkle, eyelids half-closed (dreamy). */
+.snowman.is-admiring .xm-arm { animation: xm-lift 3.2s ease-in-out both; }
+.snowman.is-admiring .xm-head { animation: xm-tilt 3.2s ease-in-out both; }
+.snowman.is-admiring .xm-pupils { animation: xm-look 3.2s ease-in-out both; }
+.snowman.is-admiring .xm-lids { animation: xm-lids 3.2s ease-in-out both; }
+.snowman.is-admiring .xm-sparkle { animation: xm-sparkle 0.6s ease-in-out 0.6s 4 alternate; }
+.snowman.is-admiring .xm-nails { animation: xm-wiggle 0.3s ease-in-out 0.8s 6 alternate; transform-box: view-box; transform-origin: 124px 118px; }
+
+@keyframes xm-lift {
+  0% { transform: rotate(0); }
+  18%, 82% { transform: rotate(-100deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes xm-tilt {
+  0% { transform: rotate(0); }
+  20%, 80% { transform: rotate(7deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes xm-look {
+  0% { transform: translate(0, 0); }
+  18%, 82% { transform: translate(3px, 1.4px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes xm-lids { 0%, 15%, 85%, 100% { opacity: 0; } 25%, 75% { opacity: 1; } }
+@keyframes xm-sparkle { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1.15); } }
+@keyframes xm-wiggle { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+@keyframes xm-wave { from { transform: rotate(-4deg); } to { transform: rotate(6deg); } }
+@keyframes xm-bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-2px) rotate(1deg); } }
+
+.xm-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 2px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font: 700 0.9rem/1.2 var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-30%, 6px) scale(0.8);
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+}
+.snowman.is-talking .xm-bubble { opacity: 1; transform: translate(-30%, 0) scale(1); }
+
+@media (min-width: 768px) {
+  .snowman { left: 14px; width: 110px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowman, .snowman .xm-arm-l, .xm-tree .xm-light, .xm-tree .xm-star { animation: none; }
+  [data-season="christmas"] .service:hover::after { transform: rotate(-8deg); }
+}
