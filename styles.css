@@ -226,9 +226,19 @@ h3 { font-size: 1.5rem; }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .services-error { text-align: center; color: var(--muted); }
 
-/* Gallery */
-.gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.gallery img { width: 100%; height: 220px; object-fit: cover; border-radius: 14px; }
+/* Gallery: 3D coverflow (Swiper, gallery.js). Until Swiper loads, or with reduced motion,
+   the same photos sit in a plain scroll-snap row. */
+.cf-sec { overflow: hidden; }
+.cf.swiper { padding: 6px 0 44px; }
+.cf:not(.is-live) .swiper-wrapper { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 20px 12px; }
+.cf:not(.is-live) .cf-slide { flex: 0 0 auto; scroll-snap-align: center; }
+.cf .cf-slide { width: min(340px, 68vw); margin: 0; border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+.cf-slide img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; }
+/* 10px dot drawn inside a 24px hit area (WCAG target size). */
+.cf.swiper > .swiper-pagination { bottom: 4px; }
+.cf .swiper-pagination-bullet { width: 24px; height: 24px; margin: 0 !important; padding: 7px; box-sizing: border-box; background: var(--text); background-clip: content-box; opacity: 0.3; }
+.cf .swiper-pagination-bullet-active { background: var(--accent); background-clip: content-box; opacity: 1; }
+.cf .swiper-pagination-bullets-dynamic .swiper-pagination-bullet { transform: none; }
 
 /* Reviews */
 .reviews { display: grid; gap: 14px; }
@@ -364,12 +374,10 @@ html.dialog-open { overflow: hidden; }
   .hero-inner { grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 56px; }
   .hero-actions .btn { flex: 0 0 auto; }
   .hero-visual img { height: auto; aspect-ratio: 1; }
-  .gallery img { height: auto; aspect-ratio: 3 / 4; }
   .section { padding: 88px 0; }
   .about { grid-template-columns: 180px 1fr; gap: 40px; }
   .about-avatar { width: 180px; height: 180px; }
   .services { grid-template-columns: repeat(2, 1fr); }
-  .gallery { grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .reviews { grid-template-columns: repeat(3, 1fr); }
   .contact { grid-template-columns: 1fr 1.1fr; align-items: start; }
   .map iframe { height: 100%; min-height: 460px; }

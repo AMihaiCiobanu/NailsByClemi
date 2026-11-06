@@ -33,10 +33,10 @@
     box.className = 'lb';
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
-    box.setAttribute('aria-label', 'Photo preview');
-    box.innerHTML = '<span class="lb-count"></span><button class="lb-x" type="button" aria-label="Close">×</button>' +
-      '<button class="lb-p" type="button" aria-label="Previous photo">‹</button>' +
-      '<button class="lb-n" type="button" aria-label="Next photo">›</button>' +
+    box.setAttribute('aria-label', 'Previzualizare poză');
+    box.innerHTML = '<span class="lb-count"></span><button class="lb-x" type="button" aria-label="Închide">×</button>' +
+      '<button class="lb-p" type="button" aria-label="Poza anterioară">‹</button>' +
+      '<button class="lb-n" type="button" aria-label="Poza următoare">›</button>' +
       '<figure><img alt=""><div class="lb-tile" hidden></div><figcaption></figcaption></figure>';
     imgEl = box.querySelector('img');
     tileEl = box.querySelector('.lb-tile');
