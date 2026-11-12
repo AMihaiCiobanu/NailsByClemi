@@ -338,9 +338,12 @@
         </div>
 
         <div class="map">
-          <iframe title="Hartă Nails by Clemi"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6407.377312751053!2d27.550934232318472!3d47.1635665093239!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40cafb20381d5f87%3A0x8066c932bf2256c5!2sNails%20by%20Clemy!5e0!3m2!1sro!2sro!4v1791305428713!5m2!1sro!2sro"
-            allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <div class="map-consent" data-map-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6407.377312751053!2d27.550934232318472!3d47.1635665093239!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40cafb20381d5f87%3A0x8066c932bf2256c5!2sNails%20by%20Clemy!5e0!3m2!1sro!2sro!4v1791305428713!5m2!1sro!2sro" data-map-title="Hartă Nails by Clemi">
+            <p>Harta e oferită de Google Maps și se încarcă doar dacă apeși butonul. Atunci Google primește adresa ta IP
+              și poate seta cookies.</p>
+            <button type="button" class="btn btn-ghost" data-map-load>Arată harta</button>
+            <a href="https://www.google.com/maps?cid=9252303704271509189" target="_blank" rel="noopener">Deschide în Google Maps</a>
+          </div>
         </div>
       </div>
     </section>
@@ -359,6 +362,9 @@
       <p>© <span id="year">2026</span> Nails by Clemi · Iași</p>
       <p class="muted small">Programări online prin <a href="https://appointmentsapps.com/ro/" target="_blank"
           rel="noopener">Appointments &amp; Reports</a></p>
+      <div class="client-legal" data-client-legal="nailsbyclemi">
+        <p class="muted small"><a href="https://appointmentsapps.com/legal/client/?c=nailsbyclemi">Politica de confidențialitate</a></p>
+      </div>
     </div>
     <div class="container">
       <p class="footer-madeby">
@@ -407,6 +413,16 @@
   <!-- HALLOWEEN:start --><script src="halloween.js?v=4" defer></script><!-- HALLOWEEN:end -->
   <!-- CHRISTMAS:start --><script src="christmas.js?v=4" defer></script><!-- CHRISTMAS:end -->
   <script type="module" src="app.js?v=9"></script>
+  <!-- Shared legal parts (footer company details, map on click) from appointmentsapps.com -->
+  <script>
+    (function () {
+      var o = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8080' : 'https://appointmentsapps.com';
+      var s = document.createElement('script');
+      s.src = o + '/legal/client-legal.js?v=1';
+      s.defer = true;
+      document.head.appendChild(s);
+    })();
+  </script>
 </body>
 
 </html>
